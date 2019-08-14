@@ -1,0 +1,56 @@
+                                     mpdfm
+                           scrobbling client for mpd
+
+scrobbler for mpd utilizing idle mode and boost.beast
+currently, mpdfm only supports the AudioScrobbler 2.0 protocol, but it is built
+to be extensible enough to easily add on new protocols
+
+                                  dependencies
+  - microsoft/GSL - Guidelines Support Library implementation by Microsoft
+  - taocpp/PEGTL  - Parse Expression Grammar Template Library (for uri parsing)
+  - taocpp/json   - JSON library (for parsing as20 responses)
+  - gabime/spdlog - spdlog logger library (for logging)
+  - openssl       - for SSL support and for md5
+  - boost         - modules: filesystem, system, asio, beast
+  - libmpdclient  - for interfacing with MPD
+
+                                    building
+$ mkdir build
+$ meson build
+$ cd build
+$ ninja
+
+meson can be given a few flags to configure the build, for example, you could
+provide meson with "--buildtype release" to build a release executable.
+
+                                     usage
+mpdfm has a primitive argument parser:
+    1) if the first argument given to it is -v, shift them (2nd -> 1st)
+      - from this point the "first" argument might really be the second
+    2) if there are two or more arguments (e.g. ['auth', 'as20'])
+    2.1) if the first argument is 'auth'
+    2.1.1) run authentication on the wanted scrobbler
+    2.1) otherwise error
+    2) otherwise:
+    2.2) treat the first argument as the config path
+    2.2.1) if there is no first argument, assume
+           "${XDG_CONFIG_HOME:-$HOME/.config}/mpdfm/mpdfm.cfg"
+    2.2) create and run scrobblers based on config
+
+examples:
+run the default config file       : mpdfm
+run a config file called test.conf: mpdfm test.conf
+run authentication for last.fm    : mpdfm auth as20
+run authentication for other as20s: mpdfm auth as20 <target> <key> <secret>
+
+                                  auth process
+the authentication process depends entirely on the scrobbler. the only
+currently supported scrobbler is as20, which is supported by last.fm and
+libre.fm
+
+to go through the authentication process, run `mpdfm auth <scrobbler>`
+
+                                 configuration
+see ./example.cfg for an example configuration file
+src/config/config_file.cpp contains the PEG definition of the configuration file
+format.
