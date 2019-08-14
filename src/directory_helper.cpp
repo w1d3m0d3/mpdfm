@@ -17,10 +17,14 @@
 #include <directory_helper.hpp>
 
 boost::filesystem::path mpdfm::get_config_path() {
-    boost::filesystem::path xdg_config_dir { std::getenv("XDG_CONFIG_HOME") };
-    if (!xdg_config_dir.empty()) {
-        return xdg_config_dir;
+    auto config_home = std::getenv("XDG_CONFIG_HOME");
+    if (bool(config_home)) {
+        return { config_home };
     }
-    boost::filesystem::path home { std::getenv("HOME") };
+    auto env_home = std::getenv("HOME");
+    if (!bool(env_home)) {
+        throw std::runtime_error("neither XDG_CONFIG_HOME nor HOME were set");
+    }
+    boost::filesystem::path home { env_home };
     return home / ".config";
 }

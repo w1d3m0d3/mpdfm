@@ -181,8 +181,8 @@ namespace {
     }
 }  // namespace
 
-int main(int arg_count, const char **arg_vec) {  // NOLINT terminate if there's
-                                                 // an unhandled excepton
+int main(int arg_count,
+         const char **arg_vec) {  // NOLINT let exceptions terminate
     using namespace std::string_view_literals;
     if (arg_count > 1 && arg_vec[1] == "-v"sv) {  // NOLINT
         arg_count--;
@@ -225,20 +225,20 @@ int main(int arg_count, const char **arg_vec) {  // NOLINT terminate if there's
             return 1;
         }
     } else {
-        // find location of config file
-        boost::filesystem::path path;
-        if (args.size() >= 2) {
-            path = args[1];
-        } else {
-            path = mpdfm::get_config_path() / "mpdfm/mpdfm.cfg";
-        }
-
         // parse config
         mpdfm::config_file cfg;
         std::string host;
         int port;
 
         try {
+            // find location of config file
+            boost::filesystem::path path;
+            if (args.size() >= 2) {
+                path = args[1];
+            } else {
+                path = mpdfm::get_config_path() / "mpdfm/mpdfm.cfg";
+            }
+
             cfg  = mpdfm::config_file(path.native());
             port = std::stoi(cfg.root_section().value("mpd_port", "6600"));
             host = cfg.root_section().value("mpd_host", "localhost");
