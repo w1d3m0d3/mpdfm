@@ -17,7 +17,6 @@
 #include "spdlog/common.h"
 #include <algorithm>
 #include <directory_helper.hpp>
-#include <filesystem>
 #include <gsl/gsl>
 #include <http_client.hpp>
 #include <iostream>
