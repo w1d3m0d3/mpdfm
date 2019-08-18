@@ -36,7 +36,8 @@ namespace {
 std::string mpdfm::urlencode(const std::string &str) {
     std::ostringstream result;
     result.fill('0');
-    for (auto &x : str) {
+    for (auto &orig : str) {
+        auto x = static_cast<uint8_t>(orig);
         if (x == ' ') {
             result << '+';
         } else if (to_replace(x)) {
