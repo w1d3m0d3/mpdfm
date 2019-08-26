@@ -26,6 +26,7 @@
 #include <fstream>
 #include <gsl/span>
 #include <http_client.hpp>
+#include <iostream>
 #include <iterator>
 #include <openssl/md5.h>
 #include <spdlog/fmt/ostr.h>
@@ -154,7 +155,7 @@ namespace {
             std::array<char, MD5_DIGEST_LENGTH * 2 + 1> digest_str = { 0 };
             for (int i = 0; i < MD5_DIGEST_LENGTH; i++) {
                 // safe code
-                digest_str[i * 2] = hex_digits[digest[i] >> 4];       // NOLINT
+                digest_str[i * 2]     = hex_digits[digest[i] >> 4];   // NOLINT
                 digest_str[i * 2 + 1] = hex_digits[digest[i] & 0xf];  // NOLINT
             }
             return std::string(digest_str.data());
@@ -379,7 +380,7 @@ mpdfm::scrobbler *mpdfm::as20::factory::do_fabrication(
     std::string session_key = section.value("session");
     auto path               = section.value("store", {});
 
-    auto target     = section.value("url", std::string(default_target));
+    auto target = section.value("url", std::string(default_target));
     std::string api_key(default_api_key);
     std::string api_secret(default_api_secret);
 
@@ -420,25 +421,24 @@ namespace {
             uri, io_context(), ssl_context());
 
         http->request().target(target);
-        http->run(
-            [&result_promise](auto http, auto ec) {
-                using tao::json::from_string;
-                try {
-                    if (ec) {
-                        throw boost::system::system_error(
-                            ec, "token request get failed");
-                    }
-                    auto v = from_string(http->response().body())
-                                 .template as<token_response>();
-                    if (!v.message.empty()) {
-                        throw std::runtime_error("last.fm api error: "
-                                                 + v.message);
-                    }
-                    result_promise.set_value(std::move(v));
-                } catch (...) {
-                    result_promise.set_exception(std::current_exception());
+        http->run([&result_promise](auto http, auto ec) {
+            using tao::json::from_string;
+            try {
+                if (ec) {
+                    throw boost::system::system_error(
+                        ec, "token request get failed");
                 }
-            });
+                auto v = from_string(http->response().body())
+                             .template as<token_response>();
+                if (!v.message.empty()) {
+                    throw std::runtime_error("last.fm api error: "
+                                             + v.message);
+                }
+                result_promise.set_value(std::move(v));
+            } catch (...) {
+                result_promise.set_exception(std::current_exception());
+            }
+        });
 
         return future.get().token;
     }
@@ -468,25 +468,24 @@ namespace {
 
         http->request().method(verb::post);
         http->request().body() = req.form();
-        http->run(
-            [&result_promise](auto http, auto ec) {
-                using tao::json::from_string;
-                try {
-                    if (ec) {
-                        throw boost::system::system_error(
-                            ec, "failed to get session");
-                    }
-                    auto v = from_string(http->response().body())
-                                 .template as<session_response>();
-                    if (!v.message.empty()) {
-                        throw std::runtime_error("last.fm api error: "
-                                                 + v.message);
-                    }
-                    result_promise.set_value(std::move(v));
-                } catch (...) {
-                    result_promise.set_exception(std::current_exception());
+        http->run([&result_promise](auto http, auto ec) {
+            using tao::json::from_string;
+            try {
+                if (ec) {
+                    throw boost::system::system_error(ec,
+                                                      "failed to get session");
                 }
-            });
+                auto v = from_string(http->response().body())
+                             .template as<session_response>();
+                if (!v.message.empty()) {
+                    throw std::runtime_error("last.fm api error: "
+                                             + v.message);
+                }
+                result_promise.set_value(std::move(v));
+            } catch (...) {
+                result_promise.set_exception(std::current_exception());
+            }
+        });
 
         return future.get().session.key;
     }

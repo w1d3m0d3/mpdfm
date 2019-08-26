@@ -117,7 +117,7 @@ namespace mpdfm::uri_parsing {
         }
     };
 
-    using grammar = tao::pegtl::must<puri::URI>;
+    using grammar = tao::pegtl::must<puri::URI, tao::pegtl::eof>;
 }  // namespace mpdfm::uri_parsing
 
 std::string_view
