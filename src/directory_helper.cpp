@@ -16,15 +16,37 @@
  */
 #include <directory_helper.hpp>
 
+#include <boost/system/system_error.hpp>
+#include <pwd.h>
+
+boost::filesystem::path mpdfm::get_home_directory() {
+    auto env_home = std::getenv("HOME");
+    if (env_home) {
+        return { env_home };
+    }
+
+    errno = 0;
+
+    const auto ptw = getpwuid(getuid());
+    if (ptw) {
+        return ptw->pw_dir;
+    }
+    if (errno) {
+        throw boost::system::system_error(
+            { errno, boost::system::system_category() },
+            "Failed to get home directory from passwd");
+    }
+    return {};
+}
+
 boost::filesystem::path mpdfm::get_config_path() {
     auto config_home = std::getenv("XDG_CONFIG_HOME");
     if (bool(config_home)) {
         return { config_home };
     }
-    auto env_home = std::getenv("HOME");
-    if (!bool(env_home)) {
-        throw std::runtime_error("neither XDG_CONFIG_HOME nor HOME were set");
+    auto home = get_home_directory();
+    if (home.empty()) {
+        return {};
     }
-    boost::filesystem::path home { env_home };
     return home / ".config";
 }

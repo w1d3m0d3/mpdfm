@@ -27,6 +27,13 @@ namespace mpdfm {
      *     ${XDG_CONFIG_HOME:-$HOME/.config}
      */
     boost::filesystem::path get_config_path();
+
+    /*!
+     * \brief Returns the path to the users home directory.
+     *
+     * First checks $HOME and then falls back to passwd
+     */
+    boost::filesystem::path get_home_directory();
 }  // namespace mpdfm
 
 #endif // DIRECTORY_HELPER_HPP
