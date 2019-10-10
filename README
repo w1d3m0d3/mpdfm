@@ -48,9 +48,10 @@ the authentication process depends entirely on the scrobbler. the only
 currently supported scrobbler is as20, which is supported by last.fm and
 libre.fm
 
-to go through the authentication process, run `mpdfm auth <scrobbler>`
+to go through the authentication process, run
+    mpdfm auth <scrobbler> [args...]
 
                                  configuration
 see ./example.cfg for an example configuration file
-src/config/config_file.cpp contains the PEG definition of the configuration file
-format.
+src/config/config_file.cpp contains the PEG definition of the configuration
+file format.
