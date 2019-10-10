@@ -146,6 +146,12 @@ namespace mpdfm {
          */
         [[nodiscard]] status run_status() const;
 
+        /*!
+         * \brief Sends a password to the server
+         * \return true on success, otherwise false
+         */
+        [[nodiscard]] bool run_password(std::string_view pass) const;
+
         // NOTE add methods as they are needed
     private:
         std::shared_ptr<::mpd_connection> m_connection = nullptr;

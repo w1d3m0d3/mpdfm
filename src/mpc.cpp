@@ -23,7 +23,6 @@
 namespace {
     template<typename Expressed>
     auto check_error(Expressed &&expressed, const mpd_connection *conn) {
-        using namespace std::string_literals;
         auto err = mpd_connection_get_error(conn);
         if (err != MPD_ERROR_SUCCESS) {
             throw std::runtime_error(
@@ -48,7 +47,6 @@ namespace {
     }
 }  // namespace
 
-// TODO(w1d3) check for errors after most calls
 mpdfm::mpd_connection::mpd_connection(const std::string &address,
                                       unsigned port,
                                       unsigned timeout) {
@@ -75,6 +73,11 @@ mpdfm::song mpdfm::mpd_connection::run_current_song() const {
 mpdfm::status mpdfm::mpd_connection::run_status() const {
     return mpdfm::status(
         check_error(mpd_run_status(m_connection.get()), m_connection));
+}
+
+bool mpdfm::mpd_connection::run_password(std::string_view pass) const {
+    return check_error(mpd_run_password(m_connection.get(), pass.data()),
+                       m_connection.get());
 }
 
 void mpdfm::mpd_connection::send_noidle() {
