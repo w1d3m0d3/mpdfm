@@ -135,12 +135,9 @@ namespace {
 
     namespace io = boost::asio;
 
-    void run_scrobblers(const std::string &host,
-                        short port,
+    void run_scrobblers(mpdfm::mpd_connection &conn,
                         scrobbler_vec &scrobblers) {
         try {
-            mpdfm::mpd_connection conn(host, port);
-
             state_tracker last;
 
             // graceful exits
@@ -226,6 +223,7 @@ int main(int arg_count,
     } else {
         // parse config
         mpdfm::config_file cfg;
+        std::string pass;
         std::string host;
         int port;
 
@@ -239,8 +237,13 @@ int main(int arg_count,
             }
 
             cfg  = mpdfm::config_file(path.native());
-            port = std::stoi(cfg.root_section().value("mpd_port", "6600"));
-            host = cfg.root_section().value("mpd_host", "localhost");
+            auto &root = cfg.root_section();
+
+            port = std::stoi(root.value("mpd_port", "6600"));
+            host = root.value("mpd_host", "localhost");
+            if (root.has_value("mpd_password")) {
+                pass = root.value("mpd_password");
+            }
         } catch (const std::system_error &e) {
             spdlog::error("failed to open configuration file: {}", e.what());
             return 1;
@@ -270,6 +273,13 @@ int main(int arg_count,
             return 1;
         }
 
-        run_scrobblers(host, gsl::narrow_cast<short>(port), scrobblers);
+        mpdfm::mpd_connection conn(host, gsl::narrow_cast<short>(port));
+        if (!pass.empty()) {
+            if (!conn.run_password(pass)) {
+                spdlog::error("password auth failed");
+                return 1;
+            }
+        }
+        run_scrobblers(conn, scrobblers);
     }
 }
