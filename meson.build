@@ -4,7 +4,7 @@ libmpdclient = dependency('libmpdclient')
 openssl = dependency('openssl')
 boost = dependency('boost', modules : ['filesystem', 'system'])
 threads = dependency('threads')
-spdlog = subproject('spdlog').get_variable('spdlog_dep')
+spdlog = dependency('spdlog', fallback: ['spdlog', 'spdlog_dep'])
 
 incl = include_directories('include')
 pegtl = include_directories('subprojects/PEGTL/include')

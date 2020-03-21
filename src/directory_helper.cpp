@@ -21,14 +21,14 @@
 
 boost::filesystem::path mpdfm::get_home_directory() {
     auto env_home = std::getenv("HOME");
-    if (env_home) {
+    if (bool(env_home)) {
         return { env_home };
     }
 
     errno = 0;
 
     const auto ptw = getpwuid(getuid());
-    if (ptw) {
+    if (bool(ptw)) {
         return ptw->pw_dir;
     }
     if (errno) {
